@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Translation Center for Magento 2
+ *
+ * @author    Marek Zabrowarny <marek.zabrowarny@creativestyle.pl>
+ * @copyright 2016 - 2017 creativestyle
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Creativestyle\TranslationCenter\Service\ConfigInterface" type="Creativestyle\TranslationCenter\Service\Config"/>
+    <preference for="Creativestyle\TranslationCenter\Service\LanguagePackage\GeneratorInterface" type="Creativestyle\TranslationCenter\Service\LanguagePackage\Generator"/>
+    <preference for="Creativestyle\TranslationCenter\Service\LanguagePackage\LocatorInterface" type="Creativestyle\TranslationCenter\Service\LanguagePackage\Locator"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\AggregatorInterface" type="Creativestyle\TranslationCenter\Service\Translation\Aggregator"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\StorageInterface" type="Creativestyle\TranslationCenter\Service\Translation\Storage\Proxy"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\ImporterInterface" type="Creativestyle\TranslationCenter\Service\Translation\Importer"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\MetadataProviderInterface" type="Creativestyle\TranslationCenter\Service\Translation\MetadataProvider"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\Storage\CacheCompositeInterface" type="Creativestyle\TranslationCenter\Service\Translation\Storage\CacheComposite"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\Storage\SynchroniseStrategyInterface" type="Creativestyle\TranslationCenter\Service\Translation\Storage\SynchroniseStrategy"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\ConfigInterface" type="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\Config"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\CredentialsProviderInterface" type="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\CredentialsProvider"/>
+    <preference for="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\SpreadsheetsListInterface" type="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\SpreadsheetsList"/>
+    <type name="Creativestyle\TranslationCenter\Model\System\Config\Source\StorageTypes">
+        <arguments>
+            <argument name="storageTypes" xsi:type="array">
+                <item name="Creativestyle\TranslationCenter\Service\Translation\Storage\Csv" xsi:type="string">CSV</item>
+                <item name="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets" xsi:type="string">Google Sheets</item>
+                <item name="Creativestyle\TranslationCenter\Service\Translation\Storage\MagentoCache" xsi:type="string">Magento Cache</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="import_phrases" xsi:type="object">Creativestyle\TranslationCenter\Console\Command\ImportPhrasesCommand</item>
+                <item name="create_language_package" xsi:type="object">Creativestyle\TranslationCenter\Console\Command\CreateLanguagePackageCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Phrase\Renderer\Translate">
+        <plugin name="creativestyle_translation_center_renderer_translate" type="Creativestyle\TranslationCenter\Plugin\Phrase\Renderer\TranslatePlugin"/>
+    </type>
+    <type name="Magento\Translation\Model\Json\PreProcessor">
+        <plugin name="creativestyle_translation_center_json_preprocessor" type="Creativestyle\TranslationCenter\Plugin\Translation\Model\Json\PreProcessorPlugin"/>
+    </type>
+    <!-- Mapping external classes instantiated by Object Manager to virtual types -->
+    <virtualType name="googleClient" type="Google_Client">
+        <arguments>
+            <argument name="config" xsi:type="array"/>
+        </arguments>
+    </virtualType>
+    <virtualType name="googleServiceDrive" type="Google_Service_Drive">
+        <arguments>
+            <argument name="client" xsi:type="object">googleClient</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="googleServiceSheets" type="Google_Service_Sheets">
+        <arguments>
+            <argument name="client" xsi:type="object">googleClient</argument>
+        </arguments>
+    </virtualType>
+    <type name="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\Client">
+        <arguments>
+            <argument name="googleClient" xsi:type="object">googleClient</argument>
+        </arguments>
+    </type>
+    <type name="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\Facade">
+        <arguments>
+            <argument name="googleSheetsService" xsi:type="object">googleServiceSheets</argument>
+        </arguments>
+    </type>
+    <type name="Creativestyle\TranslationCenter\Service\Translation\Storage\GoogleSheets\SpreadsheetsList">
+        <arguments>
+            <argument name="googleDriveService" xsi:type="object">googleServiceDrive</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Locale\ResolverInterface">
+        <plugin name="mage_localeresolver_reload" type="Magento\Framework\Translate\Locale\Resolver\Plugin" sortOrder="1" disabled="false"/>
+    </type>
+</config>
